@@ -1,0 +1,140 @@
+<project default="run">
+
+
+	<property file="build.properties"></property>
+	<property file="custom.properties"></property>
+
+	<property name="fetchTag" value="${buildBranch}"/>
+	<property name="compile.directory" location="${basedir}/01-compile"/>
+	<property name="assemble.directory" location="${basedir}/02-assemble.product"/>
+	<property name="runtests.directory" location="${basedir}/03-runtests"/>
+
+	<!-- Locate the build files inside the pde build plugin -->
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+	  <classpath>
+	    <pathelement location="${basedir}/lib/ant-contrib-1.0b3.jar"/>
+	  </classpath>
+	</taskdef>
+	<path id="featureBuildPath">
+	  <fileset dir="${eclipse.sdk}/plugins">
+            <include name="**/org.eclipse.pde.build*/scripts/build.xml" />
+	  </fileset>
+	</path>
+    <timestampselector property="featureBuildFile" pathref="featureBuildPath"/>
+
+	<path id="productBuildPath">
+      <fileset dir="${eclipse.sdk}/plugins">
+        <include name="**/org.eclipse.pde.build*/scripts/productBuild/productBuild.xml" />
+      </fileset>
+    </path>
+    <timestampselector property="productBuildFile" pathref="productBuildPath"/>
+	<echoproperties></echoproperties>
+	<!-- ================================= 
+          target: run              
+         ================================= -->
+    <target name="run" depends="clean-workspace,compile,assemble.product,runtests">
+<!--
+
+	<target name="run" depends="runtests">
+-->
+        
+    </target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: clean-workspace                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="clean-workspace">
+    	<!-- Nuke old build files -->
+		<delete dir="${buildDirectory}" failonerror="false"/> 
+		<!--workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=347151 -->
+		<delete dir="${fetchCacheLocation}" failonerror="false"/>
+ 	
+    	<!-- Just in case we run in an empty environment, create the workspace -->
+    	<mkdir dir="${workspace}"/>
+    </target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: compile                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="compile">
+    	<!-- call Eclipse to run the product build -->
+    	<java dir="${eclipse.sdk}" fork="true" logError="true" classname="org.eclipse.core.launcher.Main" failonerror="true">
+			<classpath>
+				<fileset dir="${eclipse.sdk}/plugins">
+					<include name="org.eclipse.equinox.launcher_*.jar"/>
+				</fileset>
+			</classpath>
+			<arg line="-application org.eclipse.ant.core.antRunner"/>
+			<arg line='-buildfile "${featureBuildFile}"'/>
+			<arg line='-data "${workspace}/eclipse-pde-build-workspace"'/>
+	
+			<!-- Set the directory for the PDE Build... -->
+			<jvmarg line='-Dbuilder="${compile.directory}"'/>
+			<!-- ... and pass in the properties from custom.properties -->
+			<jvmarg line="-DcompileFeature=${compileFeature}"/>
+			<jvmarg line="-DbuildType=${buildType}"/>
+			<jvmarg line="-DfetchTag=${fetchTag}"/>
+			<jvmarg line='-DbaseRepository="${baseRepository}"'/>
+			<jvmarg line='-DpluginPath="${pluginPath}"'/>
+			
+			<!-- ... and pass in the properties from build.properties -->
+			<jvmarg line='-Dbase="${base}"'/>
+			<jvmarg line='-DbaseLocation="${baseLocation}"'/>
+			<jvmarg line="-Dbaseos=${baseos}"/>
+			<jvmarg line="-Dbasews=${basews}"/>
+			<jvmarg line="-Dbasearch=${basearch}"/>
+			<jvmarg line='-DrepoBaseLocation="${repoBaseLocation}"'/>
+			<jvmarg line='-Dworkspace="${workspace}"'/>
+			<jvmarg line='-DbuildDirectory="${buildDirectory}"'/>
+			<jvmarg line='-DfetchCacheLocation="${fetchCacheLocation}"'/>
+			<jvmarg line='-Dgit.source.repo="${git.source.repo}"'/>
+			<arg line="-consolelog"/>
+		</java>
+            
+    </target>
+
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: assemble-product              
+         - - - - - - - - - - - - - - - - - -->
+    <target name="assemble.product">
+    	
+    	<!-- call Eclipse to run the product build -->
+    	<java dir="${eclipse.sdk}" fork="true" logError="true" classname="org.eclipse.core.launcher.Main" failonerror="true">
+			<classpath>
+				<fileset dir="${eclipse.sdk}/plugins">
+					<include name="org.eclipse.equinox.launcher_*.jar"/>
+				</fileset>
+			</classpath>
+			<arg line="-application org.eclipse.ant.core.antRunner"/>
+			<arg line='-buildfile "${productBuildFile}"'/>
+			<arg line='-data "${workspace}/eclipse-pde-build-workspace"'/>
+	
+			<!-- Set the directory for the PDE Build... -->
+			<jvmarg line='-Dbuilder="${assemble.directory}"'/>
+			<!-- ... and pass in the properties from custom.properties -->
+			<jvmarg line="-DproductName=${productName}"/>
+			<jvmarg line="-DbuildType=${buildType}"/>
+			<jvmarg line='-DpluginPath="${pluginPath}:${baseLocation}/buildRepo"'/>
+    		<jvmarg line='-DarchivePrefix="${archivePrefix}"'/>
+    		
+			<!-- ... and pass in the properties from build.properties -->
+			<jvmarg line='-Dbase="${base}"'/>
+			<jvmarg line='-DbaseLocation="${baseLocation}"'/>
+			<jvmarg line="-Dbaseos=${baseos}"/>
+			<jvmarg line="-Dbasews=${basews}"/>
+			<jvmarg line="-Dbasearch=${basearch}"/>
+			<jvmarg line='-Dworkspace="${workspace}"'/>
+			<jvmarg line='-DbuildDirectory="${buildDirectory}"'/>
+			<arg line="-consolelog"/>
+		</java>
+    </target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: test                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="runtests">
+		<ant antfile="${runtests.directory}/build.xml" inheritall="true"/>
+    </target>
+
+</project>

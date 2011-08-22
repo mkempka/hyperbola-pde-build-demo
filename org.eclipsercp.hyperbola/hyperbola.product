@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+
+<product name="Hyperbola Chat Client" uid="org.eclipsercp.hyperbola.product" id="org.eclipsercp.hyperbola.product" application="org.eclipsercp.hyperbola.application" version="1.0.0" useFeatures="true" includeLaunchers="true">
+
+   <aboutInfo>
+      <image path="/org.eclipsercp.hyperbola/icons/about.gif"/>
+      <text>
+         %aboutText
+      </text>
+   </aboutInfo>
+
+   <configIni use="default">
+   </configIni>
+
+   <launcherArgs>
+   </launcherArgs>
+
+   <windowImages i16="/org.eclipsercp.hyperbola/icons/online.gif"/>
+
+   <splash
+      location="org.eclipsercp.hyperbola" />
+   <launcher name="hyperbola">
+      <linux icon="/org.eclipsercp.hyperbola/branding/hyperbola.xpm"/>
+      <macosx icon="/org.eclipsercp.hyperbola/branding/hyperbola.icns"/>
+      <solaris
+            solarisLarge="/org.eclipsercp.hyperbola/branding/hyperbola.l.pm"
+            solarisMedium="/org.eclipsercp.hyperbola/branding/hyperbola.m.pm"
+            solarisSmall="/org.eclipsercp.hyperbola/branding/hyperbola.s.pm"
+            solarisTiny="/org.eclipsercp.hyperbola/branding/hyperbola.t.pm"/>
+      <win useIco="true">
+         <ico path="/org.eclipsercp.hyperbola/branding/hyperbola.ico"/>
+         <bmp/>
+      </win>
+   </launcher>
+
+   <vm>
+   </vm>
+
+   <plugins>
+   </plugins>
+
+   <features>
+      <feature id="org.eclipse.rcp" version="3.7.0.v20110216-9DB5Fm1FpBGy_AaVz-mFamgY"/>
+      <feature id="org.eclipsercp.hyperbola.feature" version="1.0.0.qualifier"/>
+   </features>
+
+
+</product>

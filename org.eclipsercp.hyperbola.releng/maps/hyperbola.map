@@ -1,0 +1,7 @@
+plugin@org.eclipsercp.hyperbola=GIT,tag=master,repo=GITREPO,path=org.eclipsercp.hyperbola
+plugin@org.eclipsercp.hyperbola.alltests=GIT,tag=master,repo=GITREPO,path=org.eclipsercp.hyperbola.alltests
+plugin@org.eclipsercp.hyperbola.core=GIT,tag=master,repo=GITREPO,path=org.eclipsercp.hyperbola.core
+fragment@org.eclipsercp.hyperbola.core.test=GIT,tag=master,repo=GITREPO,path=org.eclipsercp.hyperbola.core.test
+feature@org.eclipsercp.hyperbola.feature=GIT,tag=master,repo=GITREPO,path=org.eclipsercp.hyperbola.feature
+feature@org.eclipsercp.hyperbola.tests.feature=GIT,tag=master,repo=GITREPO,path=org.eclipsercp.hyperbola.tests.feature
+feature@org.eclipsercp.hyperbola.everything.feature=GIT,tag=master,repo=GITREPO,path=org.eclipsercp.hyperbola.everything.feature

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="testsuite" default="run" basedir=".">
+
+	<property file="${ant.file}/../runtests.properties"/>
+
+	<!-- These properties should be passed into this script -->
+	<!-- Set meaningful default values for when it is not.  -->
+	<!-- eclipse-home must contain plugins under test, should be set from the outside        -->
+	<property name="eclipse-home" value="/path/to/unzipped/product/with/installed/tests"/>
+	<!-- store test reports here, should be set from the outside                           -->
+	<property name="reportDir" value="/${eclipse-home}/testreports/"/>
+	
+	<!-- store coverage results here                            -->
+	<property name="coverageOutputDir" value="${reportDir}"/>
+	<!-- this workspace will be deleted in the script!      -->        
+	<property name="test-workspace" value="${eclipse-home}/ws/"/>
+
+	<!-- additional vm args -->
+	<property name="ecp-vmargs" value="-Dcouchdb.clientserver=${couchdb.clientserver} -Dcouchdb.admintool=${couchdb.admintool} -Dcouchdb.updateserver=${couchdb.updateserver}"/>
+	<property name="extra-vmargs" 
+		      value="${ecp-vmargs} -Xms256m -Xmx256m -Dosgi.parentClassloader=ext"/>
+	<property name="emma.enabled" value="true"/>
+	<property name="plugins-dir" value="${eclipse-home}/plugins/"/>
+	
+	<property name="os"   value="linux"/>
+	<property name="ws"   value="gtk"/>
+    <property name="arch" value="x86"/>
+	
+	<!--The location of the library.xml in the test framework -->
+	<path id="library-file-path">
+      <fileset dir="${eclipse-home}/plugins">
+        <include name="**/org.eclipse.test*/library.xml" />
+      </fileset>
+    </path>
+	<timestampselector property="library-file" pathref="library-file-path"/>
+	
+	<!-- This target holds all initialization code that needs to be done for -->
+	<!-- all tests that are to be run. Initialization for individual tests   -->
+	<!-- should be done within the body of the suite target.                 -->
+	<target name="init">
+		<tstamp/>
+		<delete>
+			<!--fileset dir="${eclipse-home}" includes="*.xml"/-->
+			<fileset dir="${eclipse-home}" includes="*.log"/>
+		</delete>
+	</target>
+	
+	
+	<target name="instrument-class-files">
+		<!-- this requires emma.jar and emma_ant.jar and emma_ant.properties in your ant classpath -->
+    <taskdef resource="emma_ant.properties" />
+		
+		<emma enabled="${emma.enabled}">
+		<instr mode="overwrite" metadatafile="${coverageOutputDir}/ecp.em" filter="${test.class.namespace.prefix}.*">
+		  <instrpath>
+		  	<fileset dir="${plugins-dir}">
+	            <include name="${test.plugin.namespace.prefix}*.jar"/>
+	        </fileset>
+		  </instrpath>
+		</instr>
+		</emma>
+	</target>
+
+	<target name="run-emma-report">
+        <!-- collect all EMMA data dumps (metadata and runtime): -->
+		<emma enabled="${emma.enabled}">
+      <report >
+        <infileset dir="${coverageOutputDir}" includes="*.em,*.ec"  />
+        <xml outfile="${coverageOutputDir}/coverage.xml" columns="class, name, method, block"/>
+        <html outfile="${coverageOutputDir}/coverage.html"/>
+      </report>
+    </emma>
+	</target>
+	
+	<target name="purge">
+		<echo message="purging ${test-workspace}"/>
+		<delete dir="${test-workspace}" quiet="true"/>
+	</target>
+	
+	<!-- This target defines the tests that need to be run. -->
+	<target name="suite">
+	  <antcall target="tests"/>
+	</target> 
+
+
+  <target name="tests">
+    <antcall target="purge"/>
+    <ant target="core-test" antfile="${library-file}" dir="${eclipse-home}">
+    	 <property name="data-dir" value="${test-workspace}"/>
+         <property name="plugin-name" value="${test.plugin.id}"/>
+         <property name="classname" value="${test.class.name}"/>
+         <property name="vmargs" value="${extra-vmargs} -Demma.coverage.out.file=${reportDir}/${test.class.name}.ec"/>
+
+    	<!-- workaround for Bug 351967 https://bugs.eclipse.org/bugs/show_bug.cgi?id=351967 -->
+    	<property name="junit-stylesheet" value="${eclipse-home}/plugins/org.eclipse.test_3.3.100/JUNIT.XSL" />
+    </ant>
+		  <copy tofile="${eclipse-home}/${test.class.name}.log" file="${test-workspace}/.metadata/.log" failonerror="false"/>
+  	  <antcall target="copyconfigurationlogs"/>
+  </target>
+	
+	<target name="copyconfigurationlogs">
+		<copy todir="${eclipse-home}">
+			<fileset dir="${eclipse-home}/configuration/">
+          <include name="*.log"/>
+      </fileset>
+		</copy>
+	</target>
+    <!-- This target holds code to cleanup the testing environment after -->
+	<!-- all of the tests have been run. You can use this target to      -->
+	<!-- delete temporary files that have been created.                  -->
+	<target name="cleanup">
+	</target>
+
+	<!-- This target runs the test suite. Any actions that need to happen -->
+	<!-- after all the tests have been run should go here.                -->
+	<target name="run" depends="init,suite,cleanup">
+		<mkdir dir="${reportDir}"/>
+		<echo>copy test results xml and log files from ${eclipse-home} to ${reportDir}</echo>
+		<copy todir="${reportDir}">
+		  <fileset dir="${eclipse-home}">
+		    <include name="*.xml" />
+		    <include name="*.log" />
+		  </fileset>
+		</copy>
+		<junitreport todir="${reportDir}">
+		  	  <fileset dir="${reportDir}">
+		  	    <include name="**/${test.class.name}.xml"/>
+		  	  </fileset>
+		  	  <report format="frames" todir="${reportDir}/junit-reports-as-html"/>
+	  	</junitreport>
+
+	</target>
+</project>
+
+
+

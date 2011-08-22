@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.1"?>
+<plugin>
+
+   <extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application>
+         <run
+               class="org.eclipsercp.hyperbola.Application">
+         </run>
+      </application>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            name="Hyperbola Perspective"
+            class="org.eclipsercp.hyperbola.Perspective"
+            id="org.eclipsercp.hyperbola.perspective">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.eclipsercp.hyperbola.ContactsView"
+            icon="icons/groups.gif"
+            id="org.eclipsercp.hyperbola.views.contacts"
+            name="Contacts"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.eclipsercp.hyperbola.ChatEditor"
+            default="false"
+            icon="icons/chat.gif"
+            id="org.eclipsercp.hyperbola.editors.chat"
+            name="Chat"/>
+   </extension>
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="org.eclipsercp.hyperbola.application"
+            name="Hyperbola Chat Client">
+         <property
+               name="windowImages"
+               value="icons/online.gif"/>
+         <property
+               name="aboutImage"
+               value="icons/about.gif"/>
+         <property
+               name="aboutText"
+               value="%aboutText"/>
+         <property
+               name="appName"
+               value="Hyperbola Chat Client">
+         </property>
+      </product>
+   </extension>
+
+</plugin>

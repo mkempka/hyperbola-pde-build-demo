@@ -1,0 +1,90 @@
+<!-- Setup the tests -->
+<project default="default">
+
+	<property name="productFileInclude" value="${buildType}.${productName}*/${productName}*${baseos}.${basews}.${basearch}.zip"/>
+
+	<!-- should be let alone -->
+	
+	<!-- Where will the testing phase artifacts be stored on disk? -->
+	<property name="testDirectory" location="${buildDirectory}/tests"/>
+	<!-- Where does the p2 director look for the install artifacts? -->
+	<property name="sourceRepositoryLocation" location="${buildDirectory}/buildRepo"/>
+	
+
+	<!-- A repository that contains necessary dependencies for test execution -->
+	<property name="testFrameworkRepositoryLocation" location="${repoBaseLocation}/mirrored/"/>
+	<!-- p2 id of the testing framework feature -->
+	<property name="testingFramework" value="org.eclipse.test.feature.group"/>
+	<!-- Feature that contains common test dependencies -->
+	<property name="pdeAddons" value="org.eclipse.pde.junit.runtime.addon.feature.group"/>
+	
+
+	<target name="default" depends="setuptests, runtests"></target>
+	
+    <target name="setuptests" description="Set up the Product and deploy the tests">
+    	
+    	<!-- unzip the product -->
+			<unzip dest="${testDirectory}">
+				<fileset dir="${buildDirectory}">
+					<include name="${productFileInclude}"/>
+				</fileset>
+			</unzip>
+    	
+    	<!-- Install the Testing Runtime requirements -->
+			<echo message="Installing ${pdeAddons} from file:/${baseLocation}"/>                        
+    		<java dir="${eclipse.sdk}" fork="true" output="${testDirectory}/${archivePrefix}/install_testframework_report.txt" logError="true" classname="org.eclipse.core.launcher.Main" failonerror="false">
+	            <classpath>                                       
+	            	<fileset dir="${eclipse.sdk}/plugins">
+	                    <include name="org.eclipse.equinox.launcher_*.jar"/>
+	                </fileset>
+				</classpath>
+                <arg line="-application org.eclipse.equinox.p2.director"/>
+                <arg line="-metadataRepository file:/${baseLocation}"/>
+                <arg line="-artifactRepository file:/${baseLocation}"/>
+                <arg line="-installIU ${pdeAddons}"/>
+                <arg line="-destination ${testDirectory}/${archivePrefix}"/>
+            </java>
+    	
+    	<!-- Install the Eclipse Test Framework -->
+			<echo message="Installing ${testingFramework} from file:/${testFrameworkRepositoryLocation}"/>                        
+    		<java dir="${eclipse.sdk}" fork="true" output="${testDirectory}/${archivePrefix}/install_testframework_report.txt" logError="true" classname="org.eclipse.core.launcher.Main" failonerror="false">
+	            <classpath>                                       
+	            	<fileset dir="${eclipse.sdk}/plugins">
+	                    <include name="org.eclipse.equinox.launcher_*.jar"/>
+	                </fileset>
+				</classpath>
+                <arg line="-application org.eclipse.equinox.p2.director"/>
+                <arg line="-metadataRepository file:/${testFrameworkRepositoryLocation}"/>
+                <arg line="-artifactRepository file:/${testFrameworkRepositoryLocation}"/>
+                <arg line="-installIU ${testingFramework}"/>
+                <arg line="-destination ${testDirectory}/${archivePrefix}"/>
+            </java>
+
+    	<!-- Install the test feature -->
+    		<echo message="Installing ${testFeature} from file:/${sourceRepositoryLocation}"/>
+			<java dir="${eclipse.sdk}" fork="true" output="${testDirectory}/${archivePrefix}/install_testsuite_report.txt" logError="true" classname="org.eclipse.core.launcher.Main" failonerror="false">
+				<classpath>
+					<fileset dir="${eclipse.sdk}/plugins">
+						<include name="org.eclipse.equinox.launcher_*.jar"/>
+					</fileset>
+				</classpath>
+				<arg line="-application org.eclipse.equinox.p2.director"/>
+				<arg line="-metadataRepository file:/${sourceRepositoryLocation}"/>
+				<arg line="-artifactRepository file:/${sourceRepositoryLocation}"/>
+				<arg line="-installIU ${testFeature}"/>
+				<arg line="-destination ${testDirectory}/${archivePrefix}"/>
+			</java>
+    	
+    </target>
+
+	<target name="runtests">
+			<ant antfile="${ant.file}/../runtests.xml" dir="${testDirectory}/${archivePrefix}" inheritall="true">
+			  <property name="os"   value="linux"/>
+			  <property name="ws"   value="gtk"/>
+		      <property name="arch" value="x86"/>
+			  <property name="test-workspace" value="${testDirectory}/workspace"/>
+			  <property name="eclipse-home"   value="${testDirectory}/${archivePrefix}"/>
+			</ant>
+	</target>
+
+</project>

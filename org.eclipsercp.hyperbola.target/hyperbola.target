@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.6"?>
+
+<target includeMode="feature" name="hyperbola" sequenceNumber="7">
+<locations>
+<location includeAllPlatforms="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.equinox.executable" version="3.5.0.v20110530-7P7NFUFFLWUl76mart"/>
+<unit id="org.eclipse.rcp.feature.group" version="3.7.0.v20110216-9DB5Fm1FpBGy_AaVz-mFamgY"/>
+<unit id="org.eclipse.rcp.source.feature.group" version="3.7.0.v20110216-9DB5Fm1FpBGy_AaVz-mFamgY"/>
+<unit id="org.eclipse.test.feature.group" version="3.5.0.v20110503-7R7aBjBgLiJz0Cv6Q4DG58520281"/>
+<unit id="org.eclipse.pde.junit.runtime.addon.feature.group" version="1.0.100.v20110331-7C7GDHAkHgHr9v0L4DF585202816"/>
+<repository location="http://download.eclipse.org/eclipse/updates/3.7/"/>
+</location>
+</locations>
+</target>
